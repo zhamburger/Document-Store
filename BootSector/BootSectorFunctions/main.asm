@@ -16,12 +16,16 @@ call print			; print(GOODBYE_WORLD)
 
 call print_new_line
 
+mov dx, 0x1fb6
+call print_hex			; print_hex(0x1fb6)
+
 jmp $
 
 
 ;=============================Imports============================
 
 %include "print.asm"		; import print file
+%include "print_hex.asm"	; import print hex file
 
 ;=============================Strings============================
 HELLO_WORLD:
