@@ -95,57 +95,45 @@ public class DocumentStoreImpl implements DocumentStore {
     @Override
     public List<String> search(String keyword) {
         if(isInvalidString(keyword)) return new ArrayList<>();
-        List<String> list = new ArrayList<>();
         List<Document> documents = this.documentTrie.getAllSorted(keyword, getWordComparator(keyword));
-        documents.forEach((document)->list.add(document.getDocumentAsTxt()));
-        return list;
+        return addDocumentStringToList(documents);
     }
 
     @Override
     public List<byte[]> searchPDFs(String keyword) {
         if(isInvalidString(keyword)) return new ArrayList<>();
-        List<byte[]> list = new ArrayList<>();
         List<Document> documents = this.documentTrie.getAllSorted(keyword, getWordComparator(keyword));
-        documents.forEach((document)->list.add(document.getDocumentAsPdf()));
-        return list;
+        return addDocumentBytesToList(documents);
     }
 
     @Override
     public List<String> searchByPrefix(String keywordPrefix) {
         if(isInvalidString(keywordPrefix)) return new ArrayList<>();
-        List<String> list = new ArrayList<>();
         List<Document> documents = this.documentTrie.getAllWithPrefixSorted(keywordPrefix, getWordComparator(keywordPrefix));
-        documents.forEach((document)->list.add(document.getDocumentAsTxt()));
-        return list;
+        return addDocumentStringToList(documents);
     }
 
     @Override
     public List<byte[]> searchPDFsByPrefix(String keywordPrefix) {
         if(isInvalidString(keywordPrefix)) return new ArrayList<>();
-        List<byte[]> list = new ArrayList<>();
         List<Document> documents = this.documentTrie.getAllWithPrefixSorted(keywordPrefix, getWordComparator(keywordPrefix));
-        documents.forEach((document)->list.add(document.getDocumentAsPdf()));
-        return list;
+        return addDocumentBytesToList(documents);
     }
 
     @Override
     public Set<URI> deleteAll(String keyword) {
         if(isInvalidString(keyword)) return new HashSet<>();
-        Set<URI> set = new HashSet<>();
         Set<Document> documents = this.documentTrie.deleteAll(keyword);
         deleteDocumentThenAddCommandSetToStack(documents);
-        documents.forEach((document)->set.add(document.getKey()));
-        return set;
+        return addDocumentsUrisToSet(documents);
     }
 
     @Override
     public Set<URI> deleteAllWithPrefix(String keywordPrefix) {
         if(isInvalidString(keywordPrefix)) return new HashSet<>();
-        Set<URI> set = new HashSet<>();
         Set<Document> documents = this.documentTrie.deleteAllWithPrefix(keywordPrefix);
         deleteDocumentThenAddCommandSetToStack(documents);
-        documents.forEach((document)->set.add(document.getKey()));
-        return set;
+        return addDocumentsUrisToSet(documents);
     }
 
 
@@ -236,6 +224,23 @@ public class DocumentStoreImpl implements DocumentStore {
 
     /*Trie Operations*/
     private void mapIntoTrie(String content, Document document){ this.documentTrie.put(content, document); }
+
+    /*Helper Methods*/
+    private Set<URI> addDocumentsUrisToSet(Set<Document> documents){
+        Set<URI> setOfUri = new HashSet<>();
+        for(Document doc : documents) setOfUri.add(doc.getKey());
+        return setOfUri;
+    }
+    private List<String> addDocumentStringToList(List<Document> documents){
+        List<String> listOfTxts = new ArrayList<>();
+        for(Document docs : documents) listOfTxts.add(docs.getDocumentAsTxt());
+        return listOfTxts;
+    }
+    private List<byte[]> addDocumentBytesToList(List<Document> documents){
+        List<byte[]> listOfBytes = new ArrayList<>();
+        for(Document docs : documents) listOfBytes.add(docs.getDocumentAsPdf());
+        return listOfBytes;
+    }
 
     /*Functions*/
     private Function<URI, Boolean> getUndoAdd() {
